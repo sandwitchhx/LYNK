@@ -1,0 +1,24 @@
+{
+  "name": "lynk-campus-helpdesk",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LYNK campus helpdesk with ticket-specific chat and application acknowledgements",
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "seed": "node server/seed.js",
+    "test": "node tests/system.test.js",
+    "load": "node tests/load-test.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2",
+    "ws": "^8.18.3"
+  }
+}
