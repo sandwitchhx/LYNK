@@ -6,8 +6,7 @@ import { config } from './config.js';
 import { api, errorHandler } from './routes.js';
 import { HttpError } from './errors.js';
 
-export function createApp() {
-  const app = express();
+export function createApp(app = express()) {
   app.disable('x-powered-by');
   app.set('trust proxy', config.nodeEnv === 'production' ? 1 : false);
   app.use(helmet({
