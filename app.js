@@ -74,7 +74,7 @@ function topicIcon(category = '') {
   if (value.includes('technology') || value.includes('it')) return ['⌘','it'];
   if (value.includes('residence') || value.includes('housing')) return ['⌂','residence'];
   if (value.includes('library')) return ['▤','library'];
-  if (value.includes('health')) return ['♡','residence'];
+  if (value.includes('health')) return ['+','residence'];
   return ['▤','library'];
 }
 function requestMarkup(ticket) {
@@ -98,7 +98,7 @@ function requestMarkup(ticket) {
 function renderTicketRows(tickets, target) {
   const list = $(target);
   if (!list) return;
-  list.innerHTML = tickets.length ? tickets.map(requestMarkup).join('') : '<div class="empty-state"><span>✧</span>No requests found.</div>';
+  list.innerHTML = tickets.length ? tickets.map(requestMarkup).join('') : '<div class="empty-state">No requests found.</div>';
 }
 function renderTicketCategories() {
   const select = $('#category-filter');
@@ -138,7 +138,7 @@ function renderDashboard(data) {
   $('#admin-unresolved-count').textContent = (counts.OPEN || 0) + (counts.ASSIGNED || 0) + (counts.IN_PROGRESS || 0);
   $('#ticket-count').textContent = Object.values(counts).reduce((total,value) => total + value,0);
   $('#admin-unread-count').textContent = data.unreadMessages || 0;
-  $('#student-greeting').innerHTML = `Welcome, ${escapeHTML(ui.user.name)} <span class="wave">☀</span>`;
+  $('#student-greeting').innerHTML = `Welcome, ${escapeHTML(ui.user.name)}`;
   $('#admin-greeting').textContent = `Overview · ${ui.user.name}`;
   const message = data.recentMessage;
   $('#home-message-name').textContent = message ? `${message.senderName || 'Conversation'} · ${shortDate(message.createdAt)}` : 'No conversations yet';
@@ -198,7 +198,6 @@ function setRoleUI() {
   $('#sidebar-name').textContent = ui.user.name;
   $('#sidebar-role').textContent = ui.user.role === 'STUDENT' ? 'Student' : ui.user.role === 'ADMIN' ? 'Administrator' : 'Helpdesk';
   $('#sidebar-avatar').textContent = (ui.user.name || 'U').slice(0,1).toUpperCase();
-  $('.campus-switch small').textContent = student ? 'Student portal' : 'Support workspace';
   $('.nav-link[data-page="overview"] span:nth-child(2)').textContent = student ? 'Home' : 'Overview';
   $('.nav-link[data-page="tickets"] span:nth-child(2)').textContent = student ? 'My requests' : 'Ticket queue';
   $('.nav-link[data-page="help"]').hidden = !student;
@@ -208,14 +207,13 @@ function setRoleUI() {
   $('#page-overview .home-grid').hidden = !student;
   $('#page-overview .gentle-note').hidden = !student;
   $$('[data-action="new-request"]').forEach(button => { button.hidden = !student; });
-  $('.help-strip').hidden = !student;
   $('#tickets-heading').textContent = student ? 'My requests' : 'Ticket queue';
   $('#tickets-description').textContent = student ? 'Review status updates and follow up with your support team.' : 'Triage, assign, and update university support requests.';
   $('.filter-tabs').hidden = false;
   $('#priority-filter').hidden = student;
   $('#category-filter').hidden = student;
   const greeting = student ? `Welcome, ${ui.user.name}` : `Overview · ${ui.user.name}`;
-  $('#student-greeting').innerHTML = `${escapeHTML(greeting)} <span class="wave">☀</span>`;
+  $('#student-greeting').innerHTML = `${escapeHTML(greeting)}`;
   $('#settings-name').textContent = ui.user.name;
   $('#settings-email').textContent = ui.user.email;
   $('#settings-avatar').textContent = (ui.user.name || 'U').slice(0,1).toUpperCase();
@@ -495,7 +493,7 @@ function renderMessage(message) {
 function renderMessages() {
   const host = $('#chat-messages');
   if (!host) return;
-  if (!ui.currentTicket) { host.innerHTML = '<div class="empty-state"><span>✧</span>Select a ticket to load its conversation.</div>'; return; }
+  if (!ui.currentTicket) { host.innerHTML = '<div class="empty-state">Select a ticket to load its conversation.</div>'; return; }
   const messages = ui.messages.get(ui.currentTicket.id) || [];
   host.innerHTML = `<div class="chat-date">${escapeHTML(ui.currentTicket.ticketId)} · ${escapeHTML(statusLabel(ui.currentTicket.status))}</div>${messages.length ? messages.map(renderMessage).join('') : '<div class="empty-state">No messages in this ticket yet.</div>'}`;
   host.scrollTop = host.scrollHeight;
@@ -567,7 +565,7 @@ function renderNotifications() {
   const host = $('#notifications-list');
   if (!host) return;
   if (!ui.notifications.length) { host.innerHTML = '<div class="empty-state">No notifications yet.</div>'; $('#notification-foot').textContent = ''; return; }
-  host.innerHTML = ui.notifications.map(item => `<article class="notification-row ${item.isRead ? '' : 'unread'}"><span class="notification-icon ${item.type.includes('MESSAGE') ? 'peach-icon' : item.type.includes('RESOLVED') ? 'mint-icon' : 'lilac-icon'}">${item.type.includes('MESSAGE') ? '▱' : item.type.includes('RESOLVED') ? '✓' : '✧'}</span><div><b>${escapeHTML(item.title)}</b><p>${escapeHTML(item.message)}</p><small>${new Date(item.createdAt).toLocaleString()}</small></div>${item.ticketId ? `<button data-notification-ticket="${escapeHTML(item.ticketId)}">Open ticket ↗</button>` : ''}${item.isRead ? '' : `<button data-mark-notification="${escapeHTML(item.id)}">Mark read</button>`}</article>`).join('');
+  host.innerHTML = ui.notifications.map(item => `<article class="notification-row ${item.isRead ? '' : 'unread'}"><span class="notification-icon ${item.type.includes('MESSAGE') ? 'peach-icon' : item.type.includes('RESOLVED') ? 'mint-icon' : 'lilac-icon'}">${item.type.includes('MESSAGE') ? '▱' : item.type.includes('RESOLVED') ? '✓' : '●'}</span><div><b>${escapeHTML(item.title)}</b><p>${escapeHTML(item.message)}</p><small>${new Date(item.createdAt).toLocaleString()}</small></div>${item.ticketId ? `<button data-notification-ticket="${escapeHTML(item.ticketId)}">Open ticket ↗</button>` : ''}${item.isRead ? '' : `<button data-mark-notification="${escapeHTML(item.id)}">Mark read</button>`}</article>`).join('');
   $('#notification-foot').textContent = '';
   $('.nav-ping').hidden = !ui.notifications.some(item => !item.isRead);
 }
@@ -671,8 +669,9 @@ $('#detail-open-conversation').addEventListener('click', () => { $('#ticket-deta
 $('#ticket-search').addEventListener('input', () => { clearTimeout(ui.searchTimer); ui.searchTimer = setTimeout(() => loadTickets().catch(error => showToast(formatError(error))), 200); });
 $('#priority-filter').addEventListener('change', () => loadTickets().catch(error => showToast(formatError(error))));
 $('#category-filter').addEventListener('change', () => loadTickets().catch(error => showToast(formatError(error))));
-$$('.filter-tab').forEach(button => button.addEventListener('click', () => {
-  $$('.filter-tab').forEach(tab => tab.classList.toggle('selected', tab === button));
+$('.filter-tab').forEach(button => button.addEventListener('click', () => {
+  $('.filter-tab').forEach(tab => tab.classList.toggle('selected', tab === button));
+  $('#assigned-filter-help').hidden = button.dataset.filter !== 'ASSIGNED';
   loadTickets().catch(error => showToast(formatError(error)));
 }));
 $('#mark-read').addEventListener('click', () => markNotification(null));

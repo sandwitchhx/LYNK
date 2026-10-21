@@ -39,6 +39,8 @@ export function createApp() {
   app.get('/tickets/:ticketId', (req, res) => res.sendFile(path.join(config.root, 'index.html')));
   app.get('/styles.css', (req, res) => res.sendFile(path.join(config.root, 'styles.css')));
   app.get('/app.js', (req, res) => res.sendFile(path.join(config.root, 'app.js')));
+  app.get('/assets/mascot.png', (req, res) => res.sendFile(path.join(config.root, 'assets', 'mascot.png')));
+  app.get('/assets/lynk-logo.png', (req, res) => res.sendFile(path.join(config.root, 'assets', 'lynk-logo.png')));
   app.use('/uploads', (req, res, next) => next(new HttpError(404, 'Not found.', 'NOT_FOUND')));
   app.use((req, res, next) => next(new HttpError(404, 'Not found.', 'NOT_FOUND')));
   app.use(errorHandler);
