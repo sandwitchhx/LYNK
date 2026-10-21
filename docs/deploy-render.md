@@ -14,15 +14,13 @@ If you use a custom domain, set `CLIENT_URL` to that exact HTTPS origin in the R
 
 ## Create the first admin account
 
-The local SQLite database is ignored by Git, so the Render service starts with an empty database. To create an admin there:
-
-1. In the Render service's **Environment** page, temporarily add:
+The local SQLite database is ignored by Git, so a new Render service starts with an empty database. In the Render service's **Environment** page, add:
    - `LYNK_BOOTSTRAP_ADMIN_NAME`
    - `LYNK_BOOTSTRAP_ADMIN_EMAIL`
    - `LYNK_BOOTSTRAP_ADMIN_PASSWORD` (at least 10 characters)
-2. Save the variables and wait for the service to redeploy.
-3. Open the service's Shell and run `npm run admin:create` once. The command hashes the password with bcrypt and creates an `ADMIN` user. If the email already belongs to an admin, it leaves that account unchanged; it never promotes another role.
-4. Remove the three bootstrap variables from the Environment page and redeploy. The account and password hash remain on the persistent disk.
+   Save the variables and wait for the service to redeploy. On startup, Render creates the admin if that email is not already registered. The password is hashed with bcrypt. An existing admin is left unchanged; the bootstrap will not promote another role.
+
+On a paid service with a persistent disk, remove the three bootstrap variables after the first successful deploy. On the free plan, leave them configured so the admin is recreated if Render replaces the ephemeral local database. Free-plan SQLite data, tickets, and uploads are not durable, so use the persistent-disk plan if you need to keep project data.
 
 Do not add real passwords or the SQLite database to the repository. Student accounts, tickets, messages, notifications, and attachments created after deployment are stored on Render's disk.
 
