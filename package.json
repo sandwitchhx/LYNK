@@ -11,6 +11,7 @@
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
     "seed": "node server/seed.js",
+    "admin:create": "node server/create-admin.js",
     "test": "node tests/system.test.js",
     "load": "node tests/load-test.js"
   },

@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: lynk-campus-helpdesk
+    runtime: node
+    plan: starter
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    disk:
+      name: lynk-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        value: /var/data/lynk.sqlite
+      - key: UPLOAD_DIR
+        value: /var/data/uploads
+      - key: COOKIE_SECURE
+        value: "true"
