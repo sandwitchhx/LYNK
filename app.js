@@ -605,10 +605,39 @@ $('#register-form').addEventListener('submit', registerStudent);
 $('#team-create-form').addEventListener('submit', createStaffAccount);
 $('#signout-button').addEventListener('click', signOut);
 $$('.nav-link[data-page]').forEach(button => button.addEventListener('click', () => setPage(button.dataset.page).catch(error => showToast(formatError(error)))));
-$$('[data-page-jump]').forEach(button => button.addEventListener('click', () => setPage(button.dataset.pageJump).catch(error => showToast(formatError(error)))));
+$$('[data-page-jump]').forEach(button => button.addEventListener('click', () => {
+  const filter = button.dataset.ticketFilter ?? (button.dataset.pageJump === 'tickets' ? '' : undefined);
+  if (filter !== undefined) {
+    const tab = $(`.filter-tab[data-filter="${filter}"]`);
+    if (tab) {
+      $$('.filter-tab').forEach(item => item.classList.toggle('selected', item === tab));
+      $('#assigned-filter-help').hidden = filter !== 'ASSIGNED';
+    }
+  }
+  setPage(button.dataset.pageJump).catch(error => showToast(formatError(error)));
+}));
 $$('[data-action="new-request"]').forEach(button => button.addEventListener('click', () => { $('#request-modal').hidden = false; document.body.style.overflow = 'hidden'; setTimeout(() => $('#request-topic').focus(), 40); }));
 $('#mobile-menu').addEventListener('click', () => $('#sidebar').classList.toggle('mobile-open'));
 $('.profile-button').addEventListener('click', () => setPage('settings'));
+$('#profile-menu-button').addEventListener('click', event => {
+  event.stopPropagation();
+  const menu = $('#profile-menu-panel');
+  menu.hidden = !menu.hidden;
+  $('#profile-menu-button').setAttribute('aria-expanded', String(!menu.hidden));
+});
+$('#profile-menu-panel').addEventListener('click', event => {
+  const action = event.target.closest('[data-profile-action]');
+  if (!action) return;
+  $('#profile-menu-panel').hidden = true;
+  $('#profile-menu-button').setAttribute('aria-expanded', 'false');
+  if (action.dataset.profileAction === 'settings') setPage('settings').catch(error => showToast(formatError(error)));
+  if (action.dataset.profileAction === 'signout') signOut();
+});
+document.addEventListener('click', event => {
+  if (event.target.closest('.profile-area')) return;
+  $('#profile-menu-panel').hidden = true;
+  $('#profile-menu-button').setAttribute('aria-expanded', 'false');
+});
 $('.modal-close').addEventListener('click', () => { $('#request-modal').hidden = true; document.body.style.overflow = ''; });
 $('#request-modal').addEventListener('click', event => { if (event.target === $('#request-modal')) { $('#request-modal').hidden = true; document.body.style.overflow = ''; } });
 $('#request-form').addEventListener('submit', createTicket);
@@ -669,8 +698,8 @@ $('#detail-open-conversation').addEventListener('click', () => { $('#ticket-deta
 $('#ticket-search').addEventListener('input', () => { clearTimeout(ui.searchTimer); ui.searchTimer = setTimeout(() => loadTickets().catch(error => showToast(formatError(error))), 200); });
 $('#priority-filter').addEventListener('change', () => loadTickets().catch(error => showToast(formatError(error))));
 $('#category-filter').addEventListener('change', () => loadTickets().catch(error => showToast(formatError(error))));
-$('.filter-tab').forEach(button => button.addEventListener('click', () => {
-  $('.filter-tab').forEach(tab => tab.classList.toggle('selected', tab === button));
+$$('.filter-tab').forEach(button => button.addEventListener('click', () => {
+  $$('.filter-tab').forEach(tab => tab.classList.toggle('selected', tab === button));
   $('#assigned-filter-help').hidden = button.dataset.filter !== 'ASSIGNED';
   loadTickets().catch(error => showToast(formatError(error)));
 }));
@@ -706,7 +735,14 @@ document.addEventListener('visibilitychange', () => {
   const messages = ui.messages.get(ui.currentTicket.id) || [];
   for (const message of messages) if (message.receiverId === ui.user?.id && ['SENT','DELIVERED'].includes(message.status)) socketSend({ type:'READ_ACK', messageId:message.messageId, ticketId:message.ticketId, conversationId:message.conversationId });
 });
-document.addEventListener('keydown', event => { if (event.key === 'Escape' && !$('#request-modal').hidden) { $('#request-modal').hidden = true; document.body.style.overflow = ''; } });
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && !$('#request-modal').hidden) { $('#request-modal').hidden = true; document.body.style.overflow = ''; }
+  if (event.key === 'Escape' && !$('#profile-menu-panel').hidden) {
+    $('#profile-menu-panel').hidden = true;
+    $('#profile-menu-button').setAttribute('aria-expanded', 'false');
+    $('#profile-menu-button').focus();
+  }
+});
 
 async function initialize() {
   const reducedMotion = localStorage.getItem('lynk-reduced-motion') === 'true';

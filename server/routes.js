@@ -123,7 +123,12 @@ api.get('/dashboard', authenticate, (req, res) => {
 api.get('/tickets', authenticate, (req, res) => {
   let tickets = ticketListFor(req.user);
   const search = String(req.query.search || '').trim().toLowerCase();
-  if (req.query.status) tickets = tickets.filter(ticket => ticket.status === String(req.query.status).toUpperCase());
+  if (req.query.status) {
+    const status = String(req.query.status).toUpperCase();
+    tickets = status === 'UNRESOLVED'
+      ? tickets.filter(ticket => ['OPEN','ASSIGNED','IN_PROGRESS'].includes(ticket.status))
+      : tickets.filter(ticket => ticket.status === status);
+  }
   if (req.query.priority) tickets = tickets.filter(ticket => ticket.priority === String(req.query.priority).toUpperCase());
   if (req.query.category) tickets = tickets.filter(ticket => ticket.category.toLowerCase() === String(req.query.category).toLowerCase());
   if (search) tickets = tickets.filter(ticket => `${ticket.public_id} ${ticket.title} ${ticket.category} ${ticket.priority} ${ticket.status} ${ticket.assigned_admin_name || ''} ${ticket.student_name || ''}`.toLowerCase().includes(search));
